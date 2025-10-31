@@ -1,0 +1,32 @@
+# Default Pipeline Configuration
+data:
+  test_size: 0.25
+  random_state: 42
+  drop_columns:
+    - Id
+    - Alley
+    - PoolQC
+    - Fence
+    - MiscFeature
+
+preprocessing:
+  imputer: iterative  # Options: simple, iterative, knn
+  outlier: winsor     # Options: none, winsor, iqr
+  skew: log1p         # Options: none, log1p, yeojohnson
+  scaler: standard    # Options: minmax, standard, robust
+  use_ordinal: true   # Use ordinal encoding for ordered categories
+  use_fe: true        # Apply feature engineering
+
+model:
+  name: ridge         # Options: linearreg, ridge, lasso, elasticnet, huber, ransac, quantile
+  params: {}          # Model-specific hyperparameters
+
+tuning:
+  enabled: true
+  n_trials: 20
+  cv_folds: 3
+
+output:
+  save_model: true
+  save_results: true
+  create_plots: true

@@ -1,6 +1,6 @@
-# House Prices Prediction - Production ML Pipeline
+# House Prices Prediction - Production ML Pipeline with Explainability
 
-A modular, CLI-driven, and extensible Python project for House Prices prediction using scikit-learn pipelines. This project refactors a Jupyter Notebook into production-ready code with comprehensive benchmarking, hyperparameter tuning, and interactive demo capabilities.
+A modular, CLI-driven, and extensible Python project for House Prices prediction using scikit-learn pipelines. This project refactors a Jupyter Notebook into production-ready code with comprehensive benchmarking, hyperparameter tuning, **model explainability (XAI)**, and interactive demo capabilities.
 
 ## 🚀 Features
 
@@ -12,6 +12,28 @@ A modular, CLI-driven, and extensible Python project for House Prices prediction
 - **Hyperparameter Tuning**: Bayesian optimization with Optuna (20 trials, 3-fold CV)
 - **Model Persistence**: Save/load trained pipelines with joblib
 - **Visualization**: Automated plotting of benchmark results
+- **🆕 Model Explainability (XAI)**: SHAP values, permutation importance, feature analysis
+
+## 🔍 New: Explainability Module
+
+The project now includes comprehensive model explainability using:
+- **SHAP (SHapley Additive exPlanations)**: Feature importance and interaction analysis
+- **Permutation Importance**: Model-agnostic feature ranking
+- **Rich Visualizations**: Summary plots, dependence plots, importance rankings
+
+**Quick start:**
+```bash
+# Train model with explainability
+python main.py --mode train --config config/default_pipeline.yaml --save_model --explain
+
+# Explain existing model
+python main.py --mode explain \
+  --model_path models/best_pipeline.joblib \
+  --X_path data/X_test.csv \
+  --y_path data/y_test.npy
+```
+
+📖 **Full documentation**: [`docs/XAI_MODULE.md`](docs/XAI_MODULE.md) | [`docs/XAI_QUICKSTART.md`](docs/XAI_QUICKSTART.md)
 
 ## 📁 Project Structure
 
@@ -20,9 +42,12 @@ house_prices_project/
 ├── README.md
 ├── requirements.txt
 ├── config/
-│   └── default_pipeline.yaml       # Pipeline configuration
+│   └── default_pipeline.yaml       # Pipeline configuration (includes XAI settings)
 ├── data/
 │   └── raw/                         # Raw CSV data (auto-downloaded)
+├── docs/                            # 🆕 Documentation
+│   ├── XAI_MODULE.md                # Full XAI documentation
+│   └── XAI_QUICKSTART.md            # Quick start guide
 ├── src/
 │   ├── __init__.py
 │   ├── data_loader.py              # Data loading & EDA
@@ -30,13 +55,15 @@ house_prices_project/
 │   ├── preprocessing.py            # Pipeline construction
 │   ├── models.py                   # Model training & tuning
 │   ├── trainer.py                  # Orchestration
-│   └── utils.py                    # Visualization & helpers
+│   ├── utils.py                    # Visualization & helpers
+│   └── xai.py                      # 🆕 Explainability module
 ├── models/                          # Saved models
 ├── results/                         # Benchmark results & plots
 ├── notebooks/                       # Original notebook
 ├── tests/
-│   └── test_pipeline.py            # Unit tests
-├── main.py                         # CLI entry point
+│   ├── test_pipeline.py            # Unit tests
+│   └── test_xai_smoke.py           # 🆕 XAI smoke tests
+├── main.py                         # CLI entry point (updated)
 ```
 
 ## 🛠️ Installation
@@ -52,7 +79,7 @@ house_prices_project/
 git clone <repository-url>
 cd house_prices_project
 
-# Install dependencies
+# Install dependencies (includes SHAP)
 pip install -r requirements.txt
 ```
 
@@ -74,7 +101,7 @@ Features:
 ### 2. Train Single Pipeline
 
 ```bash
-python main.py --mode train --config config/default.yaml --save_model
+python main.py --mode train --config config/default_pipeline.yaml --save_model
 ```
 
 This will:
@@ -96,7 +123,39 @@ Train_R2: 0.9234
 Test_R2: 0.8912
 ```
 
-### 3. Full Benchmark
+### 3. Train with Explainability 🆕
+
+```bash
+python main.py --mode train \
+  --config config/default_pipeline.yaml \
+  --save_model \
+  --explain
+```
+
+This adds:
+- SHAP value computation
+- Permutation importance analysis
+- Visualization generation
+- Summary report
+
+**Output:** `models/explain/` directory with plots and CSVs
+
+### 4. Explain Existing Model 🆕
+
+```bash
+python main.py --mode explain \
+  --model_path models/best_pipeline.joblib \
+  --X_path data/X_test.csv \
+  --y_path data/y_test.npy \
+  --output results/explain
+```
+
+**Requirements:**
+- Saved model (joblib format)
+- Features CSV (original, unprocessed)
+- Target CSV or NPY file
+
+### 5. Full Benchmark
 
 ```bash
 python main.py --mode benchmark --data_path data/raw/train-house-prices-advanced-regression-techniques.csv
@@ -137,6 +196,13 @@ tuning:
   enabled: true
   n_trials: 20
   cv_folds: 3
+
+# 🆕 Explainability settings
+explainability:
+  sample_size: 1000      # Number of samples for SHAP (↓ for speed)
+  n_repeats: 30          # Permutation importance repeats
+  background_size: 100   # KernelExplainer background samples
+  top_features: 20       # Features to display in plots
 ```
 
 ## 🔬 Pipeline Components
@@ -174,6 +240,11 @@ tuning:
 - **RAE**: Relative Absolute Error (ratio-based metric)
 - **R²**: Coefficient of determination (higher is better)
 
+### 🆕 Explainability Metrics
+- **SHAP Values**: Feature contribution to predictions
+- **Permutation Importance**: Model reliance on features
+- **Dependence Plots**: Feature interaction analysis
+
 ## 📈 Expected Performance
 
 Based on Kaggle kernels and typical results:
@@ -194,14 +265,43 @@ Based on Kaggle kernels and typical results:
 ## 🧪 Testing
 
 ```bash
-# Run unit tests
-pytest tests/test_pipeline.py -v
+# Run all tests
+pytest tests/ -v
 
-# Test specific function
-pytest tests/test_pipeline.py::test_evaluate_pipeline -v
+# Run specific test suite
+pytest tests/test_pipeline.py -v
+pytest tests/test_xai_smoke.py -v  # 🆕 XAI tests
+
+# Run with coverage
+pytest tests/ --cov=src --cov-report=html
 ```
 
-## 🔄 Extending the Project
+## 🆕 Explainability Output Examples
+
+### SHAP Summary (Beeswarm)
+Shows how each feature impacts predictions:
+- Red dots: High feature values
+- Blue dots: Low feature values
+- X-axis: SHAP value (impact on prediction)
+
+### Permutation Importance
+Ranks features by model reliance:
+```
+TOP 10 FEATURES BY PERMUTATION IMPORTANCE
+1. num_GrLivArea           0.054321 ± 0.002341
+2. num_OverallQual         0.041234 ± 0.001890
+3. num_TotalBsmtSF         0.032145 ± 0.001456
+...
+```
+
+### Explainability Report
+Text summary with:
+- Model metadata
+- Top 10 features (SHAP + Permutation)
+- Files generated
+- Interpretation guidance
+
+## 📄 Extending the Project
 
 ### Add New Model
 Edit `src/models.py`:
@@ -227,6 +327,16 @@ NEW_COMPONENT = {
 ### Customize Feature Engineering
 Edit `src/feature_engineering.py` → `add_features()` function
 
+### 🆕 Add Custom Explainability
+Edit `src/xai.py`:
+
+```python
+class ExplainabilityAnalyzer:
+    def compute_custom_metric(self, X, y, output_dir):
+        # Your custom explainability logic
+        pass
+```
+
 ## 📦 Data
 
 **Source**: Kaggle House Prices - Advanced Regression Techniques
@@ -241,48 +351,77 @@ Edit `src/feature_engineering.py` → `add_features()` function
 gdown 1Dh_y7gFDUa2sD72_cKIa209dhbMVoGEd -O data/raw/train-house-prices-advanced-regression-techniques.csv
 ```
 
-## 🐛 Troubleshooting
+## 🛠 Troubleshooting
+
+### XAI-Specific Issues
+
+**Issue**: `ModuleNotFoundError: No module named 'shap'`
+```bash
+pip install shap
+```
+
+**Issue**: `SHAP computation is too slow`
+```yaml
+# Edit config/default_pipeline.yaml
+explainability:
+  sample_size: 200  # Reduce from 1000
+```
+
+**Issue**: `Feature names don't match`
+- Use **original** features (not preprocessed) for `X_path`
+- Let `ExplainabilityAnalyzer` handle preprocessing
+
+### General Issues
 
 **Issue**: `Model file not found`
 ```bash
-# Solution: Train a model first
+# Train a model first
 python main.py --mode train --config config/default_pipeline.yaml --save_model
 ```
 
 **Issue**: `Data file not found`
 ```bash
-# Solution: The project auto-downloads, but if it fails:
+# The project auto-downloads, but if it fails:
 mkdir -p data/raw
 gdown 1Dh_y7gFDUa2sD72_cKIa209dhbMVoGEd -O data/raw/train-house-prices-advanced-regression-techniques.csv
 ```
 
-**Issue**: Gradio demo errors
-```bash
-# Solution: Ensure model exists and all dependencies are installed
-pip install --upgrade gradio
-```
+## 📁 Advanced Usage
 
-## 📝 Advanced Usage
-
-### Save specific benchmark config as model
-1. Run benchmark to find best config
-2. Update `config/default_pipeline.yaml` with best parameters
-3. Run `python main.py --mode train --save_model`
-
-### Batch predictions
+### Batch Explainability
 ```python
-from src.utils import load_model
-import pandas as pd
+from src.xai import explain_model_pipeline
 
-preprocessor, model = load_model('models/best_pipeline.joblib')
-X_new = pd.read_csv('new_houses.csv')
-X_processed = preprocessor.transform(X_new)
-predictions = model.predict(X_processed)
-predictions = np.expm1(predictions)  # Inverse log transform
+models = ['ridge', 'lasso', 'elasticnet']
+for model_name in models:
+    explain_model_pipeline(
+        model_path=f'models/{model_name}.joblib',
+        X_path='data/X_test.csv',
+        y_path='data/y_test.npy',
+        output_dir=f'results/explain_{model_name}'
+    )
 ```
 
-### Custom benchmarking
-Edit `src/preprocessing.py` → `get_benchmark_configs()` to add/remove configurations
+### Custom SHAP Analysis
+```python
+from src.xai import ExplainabilityAnalyzer
+import joblib
+
+pipeline = joblib.load('models/best_pipeline.joblib')
+analyzer = ExplainabilityAnalyzer(
+    preprocessor=pipeline['preprocessor'],
+    model=pipeline['model'],
+    feature_names_in=X_test.columns.tolist(),
+    target_log_transformed=True
+)
+
+# Explain specific samples
+shap_values, explanation = analyzer.compute_shap(
+    X_test.iloc[:100],  # First 100 samples
+    output_dir='results/sample_explain',
+    sample_size=100
+)
+```
 
 ## 🎯 Key Design Decisions
 
@@ -291,12 +430,15 @@ Edit `src/preprocessing.py` → `get_benchmark_configs()` to add/remove configur
 3. **Outlier Strategy**: Winsorize preferred over removal to preserve sample size
 4. **CV Strategy**: 3-fold CV during tuning balances accuracy and speed
 5. **Metric Focus**: RMSE for interpretability (same units as $), R² for variance explained
+6. **🆕 XAI Integration**: Pipeline-aware explainability with automatic feature name extraction
 
 ## 📚 References
 
 - Original Kaggle Competition: [House Prices - Advanced Regression Techniques](https://www.kaggle.com/c/house-prices-advanced-regression-techniques)
 - scikit-learn Documentation: [sklearn.pipeline](https://scikit-learn.org/stable/modules/compose.html)
 - Optuna Documentation: [optuna.org](https://optuna.org/)
+- **🆕 SHAP Documentation**: [shap.readthedocs.io](https://shap.readthedocs.io/)
+- **🆕 Lundberg & Lee (2017)**: [A Unified Approach to Interpreting Model Predictions](https://arxiv.org/abs/1705.07874)
 
 ## 🤝 Contributing
 
@@ -314,8 +456,28 @@ This project is licensed under the MIT License.
 
 - Original Jupyter Notebook: Module 5 House Prices prediction project
 - Kaggle community for dataset and insights
-- scikit-learn, Optuna, and Gradio teams
+- scikit-learn, Optuna, and **SHAP** teams for excellent tools
+- Lundberg & Lee for SHAP methodology
+
+---
+
+## 🆕 What's New in v2.0
+
+- ✅ **Explainability Module**: SHAP + Permutation Importance
+- ✅ **New CLI Mode**: `python main.py --mode explain`
+- ✅ **XAI Tests**: Comprehensive test coverage for explainability
+- ✅ **Documentation**: Full XAI module documentation + quick start guide
+- ✅ **Config Updates**: Explainability settings in YAML
+- ✅ **Backward Compatible**: All existing features still work
+
+**Upgrade from v1.x:**
+```bash
+pip install -r requirements.txt  # Installs SHAP
+# No code changes needed - existing scripts work as before
+```
 
 ---
 
 **Contact**: For questions or issues, please open a GitHub issue or contact the maintainers.
+
+📖 **Documentation**: [`docs/XAI_MODULE.md`](docs/XAI_MODULE.md) | [`docs/XAI_QUICKSTART.md`](docs/XAI_QUICKSTART.md)

@@ -103,4 +103,7 @@ models/
 # Pyright
 .pyright/
 
+
+tests/
+
 # End of .gitignore

@@ -10,23 +10,31 @@ data:
     - MiscFeature
 
 preprocessing:
-  imputer: iterative  # Options: simple, iterative, knn
-  outlier: winsor     # Options: none, winsor, iqr
-  skew: log1p         # Options: none, log1p, yeojohnson
-  scaler: standard    # Options: minmax, standard, robust
+  imputer: KNN  # Options: simple, iterative, knn
+  outlier: none     # Options: none, winsor, iqr
+  skew: none         # Options: none, log1p, yeojohnson
+  scaler: robust    # Options: minmax, standard, robust
   use_ordinal: true   # Use ordinal encoding for ordered categories
   use_fe: true        # Apply feature engineering
 
 model:
-  name: ridge         # Options: linearreg, ridge, lasso, elasticnet, huber, ransac, quantile
+  name: quantile         # Options: linearreg, ridge, lasso, elasticnet, huber, ransac, quantile
   params: {}          # Model-specific hyperparameters
 
 tuning:
   enabled: true
   n_trials: 20
-  cv_folds: 3
+  cv_folds: 5
 
 output:
   save_model: true
   save_results: true
   create_plots: true
+
+# NEW: Explainability settings
+explainability:
+  enabled: false         # Run explainability by default (use --explain flag instead)
+  sample_size: 1000      # Number of samples for SHAP computation (for speed)
+  n_repeats: 30          # Permutation importance repeats
+  background_size: 100   # Background samples for KernelExplainer (if needed)
+  top_features: 20       # Number of top features to display in plots

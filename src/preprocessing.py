@@ -113,41 +113,49 @@ class PipelineBuilder:
         return preprocessor
 
 
+# def get_benchmark_configs() -> List[tuple]:
+#     return [
+#     ('Simple_Log_Winsor_Standard_OneHot', 'Simple', 'Winsor', 'Log1p', 'Standard', False),
+#     ('Iterative_Log_Winsor_Standard_OneHot', 'Iterative', 'Winsor', 'Log1p', 'Standard', False),
+#     ('KNN_Log_Winsor_Standard_OneHot', 'KNN', 'Winsor', 'Log1p', 'Standard', False),
+#     ('Iterative_Log_IQR_Standard_OneHot', 'Iterative', 'IQR', 'Log1p', 'Standard', False),
+#     ('Iterative_YeoJohnson_Winsor_Standard_OneHot', 'Iterative', 'Winsor', 'YeoJohnson', 'Standard', False),
+#     ('Iterative_Log_Winsor_MinMax_OneHot', 'Iterative', 'Winsor', 'Log1p', 'MinMax', False),
+#     ('Iterative_Log_Winsor_Robust_OneHot', 'Iterative', 'Winsor', 'Log1p', 'Robust', False),
+#     ('Iterative_Log_Winsor_Standard_Ordinal', 'Iterative', 'Winsor', 'Log1p', 'Standard', True),
+#     ('KNN_YeoJohnson_IQR_Robust_OneHot', 'KNN', 'IQR', 'YeoJohnson', 'Robust', False),
+#     ('Simple_Log_Winsor_MinMax_OneHot', 'Simple', 'Winsor', 'Log1p', 'MinMax', False),
+#     ('KNN_Log_None_Standard_OneHot', 'KNN', 'None', 'Log1p', 'Standard', False),
+#     ('Simple_YeoJohnson_Winsor_Robust_OneHot', 'Simple', 'Winsor', 'YeoJohnson', 'Robust', False),
+#     ('Iterative_None_IQR_Robust_OneHot', 'Iterative', 'IQR', 'None', 'Robust', False),
+#     ('Simple_Log_IQR_Standard_OneHot', 'Simple', 'IQR', 'Log1p', 'Standard', False),
+#     ('KNN_YeoJohnson_Winsor_MinMax_OneHot', 'KNN', 'Winsor', 'YeoJohnson', 'MinMax', False),
+# ]
+
 def get_benchmark_configs() -> List[tuple]:
-    return [
-        # Vary imputation with fixed other components
-        ('Simple_Log_Winsor_Standard_OneHot', 'Simple', 'Winsor', 'Log1p', 'Standard', False),
-        ('Iterative_Log_Winsor_Standard_OneHot', 'Iterative', 'Winsor', 'Log1p', 'Standard', False),
-        ('KNN_Log_Winsor_Standard_OneHot', 'KNN', 'Winsor', 'Log1p', 'Standard', False),
-        
-        # Vary outlier handling
-        ('Iterative_Log_IQR_Standard_OneHot', 'Iterative', 'IQR', 'Log1p', 'Standard', False),
-        ('Iterative_Log_None_Standard_OneHot', 'Iterative', 'None', 'Log1p', 'Standard', False),
-        
-        # Vary skew transformation
-        ('Iterative_YeoJohnson_Winsor_Standard_OneHot', 'Iterative', 'Winsor', 'YeoJohnson', 'Standard', False),
-        ('Iterative_None_Winsor_Standard_OneHot', 'Iterative', 'Winsor', 'None', 'Standard', False),
-        
-        # Vary scaling
-        ('Iterative_Log_Winsor_MinMax_OneHot', 'Iterative', 'Winsor', 'Log1p', 'MinMax', False),
-        ('Iterative_Log_Winsor_Robust_OneHot', 'Iterative', 'Winsor', 'Log1p', 'Robust', False),
-        
-        # Try ordinal encoding
-        ('Iterative_Log_Winsor_Standard_Ordinal', 'Iterative', 'Winsor', 'Log1p', 'Standard', True),
-        ('Simple_Log_Winsor_MinMax_Ordinal', 'Simple', 'Winsor', 'Log1p', 'MinMax', True),
-        
-        # More combinations
-        ('KNN_YeoJohnson_IQR_Robust_OneHot', 'KNN', 'IQR', 'YeoJohnson', 'Robust', False),
-        ('Simple_None_None_MinMax_OneHot', 'Simple', 'None', 'None', 'MinMax', False),
-        ('KNN_Log_None_Standard_OneHot', 'KNN', 'None', 'Log1p', 'Standard', False),
-        ('Iterative_YeoJohnson_IQR_MinMax_OneHot', 'Iterative', 'IQR', 'YeoJohnson', 'MinMax', False),
-        ('Simple_YeoJohnson_Winsor_Robust_OneHot', 'Simple', 'Winsor', 'YeoJohnson', 'Robust', False),
-        ('KNN_None_IQR_MinMax_OneHot', 'KNN', 'IQR', 'None', 'MinMax', False),
-        ('Simple_Log_IQR_Standard_Ordinal', 'Simple', 'IQR', 'Log1p', 'Standard', True),
-        ('Iterative_None_IQR_Robust_OneHot', 'Iterative', 'IQR', 'None', 'Robust', False),
-        ('KNN_YeoJohnson_Winsor_MinMax_Ordinal', 'KNN', 'Winsor', 'YeoJohnson', 'MinMax', True),
-        ('Simple_Log_None_Robust_OneHot', 'Simple', 'None', 'Log1p', 'Robust', False),
-    ]
+    imputers = ['Simple', 'Iterative', 'KNN']
+    outliers = ['None', 'Winsor', 'IQR']
+    skews = ['None', 'Log1p', 'YeoJohnson']
+    scalers = ['MinMax', 'Standard', 'Robust']
+    ordinal_flags = [False, True]
+
+    configs: List[tuple] = []
+    for imp in imputers:
+        for out in outliers:
+            for skw in skews:
+                for scl in scalers:
+                    for ord_flag in ordinal_flags:
+                        name_parts = [
+                            imp,
+                            skw,
+                            out,
+                            scl,
+                            'Ordinal' if ord_flag else 'OneHot'
+                        ]
+                        # create a concise name, e.g. "Iterative_Log1p_Winsor_Standard_Ordinal"
+                        name = "_".join(name_parts)
+                        configs.append((name, imp, out, skw, scl, ord_flag))
+    return configs
 
 
 def create_pipeline_from_config_tuple(

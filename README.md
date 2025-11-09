@@ -24,7 +24,7 @@ The project now includes comprehensive model explainability using:
 **Quick start:**
 ```bash
 # Train model with explainability
-python main.py --mode train --config config/default_pipeline.yaml --save_model --explain
+python main.py --mode train --config config/default.yaml --save_model --explain
 
 # Explain existing model
 python main.py --mode explain \
@@ -42,12 +42,9 @@ house_prices_project/
 ├── README.md
 ├── requirements.txt
 ├── config/
-│   └── default_pipeline.yaml       # Pipeline configuration (includes XAI settings)
+│   └── default.yaml       # Pipeline configuration (includes XAI settings)
 ├── data/
 │   └── raw/                         # Raw CSV data (auto-downloaded)
-├── docs/                            # 🆕 Documentation
-│   ├── XAI_MODULE.md                # Full XAI documentation
-│   └── XAI_QUICKSTART.md            # Quick start guide
 ├── src/
 │   ├── __init__.py
 │   ├── data_loader.py              # Data loading & EDA
@@ -62,7 +59,6 @@ house_prices_project/
 ├── notebooks/                       # Original notebook
 ├── tests/
 │   ├── test_pipeline.py            # Unit tests
-│   └── test_xai_smoke.py           # 🆕 XAI smoke tests
 ├── main.py                         # CLI entry point (updated)
 ```
 
@@ -101,7 +97,7 @@ Features:
 ### 2. Train Single Pipeline
 
 ```bash
-python main.py --mode train --config config/default_pipeline.yaml --save_model
+python main.py --mode train --config config/default.yaml --save_model
 ```
 
 This will:
@@ -127,7 +123,7 @@ Test_R2: 0.8912
 
 ```bash
 python main.py --mode train \
-  --config config/default_pipeline.yaml \
+  --config config/default.yaml \
   --save_model \
   --explain
 ```
@@ -162,7 +158,7 @@ python main.py --mode benchmark --data_path data/raw/train-house-prices-advanced
 ```
 
 This executes:
-1. **Phase 1**: Evaluate 20 pipeline configs × 7 models without FE (~140 runs)
+1. **Phase 1**: Evaluate all pipeline configs without FE (~260 runs)
 2. **Phase 2**: Apply FE to top 10 configs and re-evaluate
 3. **Phase 3**: Tune hyperparameters for top 10 pipelines (Optuna)
 4. **Output**: 
@@ -172,7 +168,7 @@ This executes:
 
 ## ⚙️ Configuration
 
-Edit `config/default_pipeline.yaml`:
+Edit `config/default.yaml`:
 
 ```yaml
 data:
@@ -362,7 +358,7 @@ pip install shap
 
 **Issue**: `SHAP computation is too slow`
 ```yaml
-# Edit config/default_pipeline.yaml
+# Edit config/default.yaml
 explainability:
   sample_size: 200  # Reduce from 1000
 ```
@@ -376,7 +372,7 @@ explainability:
 **Issue**: `Model file not found`
 ```bash
 # Train a model first
-python main.py --mode train --config config/default_pipeline.yaml --save_model
+python main.py --mode train --config config/default.yaml --save_model
 ```
 
 **Issue**: `Data file not found`
